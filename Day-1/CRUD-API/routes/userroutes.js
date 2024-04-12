@@ -14,10 +14,10 @@ const userRouter = express.Router();
 // while registering encrypting password with bcrypt and hashing algorithm
 
 userRouter.post("/signup", log, async (req, res) =>{
-    const {username,email,password}=req.body
+    const {username,email,password,createdAt}=req.body
     try {
         bcrypt.hash(password, 8, async (err, hash)=>{
-            const user=new User({username,email,password:hash})
+            const user=new User({username,email,password:hash,createdAt})
             try {
                 await user.save()
                 res.status(200).send({msg:"registration successful"})
@@ -134,6 +134,26 @@ userRouter.delete('/delete/:userId',log, async (req, res) => {
     }
 });
 
+
+
+userRouter.get('/analytics', async (req, res) => {
+    try {
+        const analytics = await User.aggregate([
+            {
+                $group: {
+                    _id: { $month: "$createdAt" },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { "_id": 1 }
+            }
+        ]);
+        res.json(analytics);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
 
 
 module.exports = userRouter;

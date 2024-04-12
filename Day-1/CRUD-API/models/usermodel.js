@@ -6,7 +6,8 @@ const mongoose  = require('mongoose');
 const userSchema = mongoose.Schema({
     username: String,
     email: String,
-    password: String
+    password: String,
+    createdAt : { type: Date, default: Date.now }
 },{
     versionKey:false
 })
