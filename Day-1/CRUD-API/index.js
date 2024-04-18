@@ -2,7 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
-const cacheControl = require('express-cache-ctrl');
+const swaggerDocs = require('./swagger');
+
 var cors = require('cors');
 const connected_to_LocalDb = require('./configs/db');
 const userRouter = require('./routes/userroutes');
@@ -29,7 +30,7 @@ app.get("/", (req,res) =>{
 
 app.use("/user", userRouter)
 
-
+swaggerDocs(app);
 
 // exporting the app
 module.exports = app

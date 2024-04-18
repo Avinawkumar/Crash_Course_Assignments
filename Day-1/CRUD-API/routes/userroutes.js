@@ -11,11 +11,53 @@ const cache = new NodeCache({ stdTTL: 60 }); // Cache data for 60 seconds
 const userRouter = express.Router();
 
 
-
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         username:
+ *           type: string
+ *         email:
+ *           type: string
+ *         password:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *     LoginResponse:
+ *       type: object
+ *       properties:
+ *         msg:
+ *           type: string
+ *         token:
+ *           type: string
+ */
 
 //register routes
 // while registering encrypting password with bcrypt and hashing algorithm
 
+
+
+/**
+ * @swagger
+ * /user/signup:
+ *   post:
+ *     summary: Register a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: Registration successful
+ *       400:
+ *         description: Bad request
+ */
 userRouter.post("/signup", log, async (req, res) =>{
     const {username,email,password,createdAt}=req.body
     try {
@@ -39,6 +81,28 @@ userRouter.post("/signup", log, async (req, res) =>{
 
 // login routes
 // while login comparing encrypted password that is saved in DB in incrypted format
+
+/**
+ * @swagger
+ * /user/login:
+ *   post:
+ *     summary: Login a user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginResponse'
+ *       400:
+ *         description: Bad request
+ */
 userRouter.post("/login",log, async (req, res) => {
     const {email,password} = req.body;
     try {
