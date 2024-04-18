@@ -3,7 +3,10 @@ const { User } = require('../models/usermodel');
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { log } = require('../middleware/log.middleware');
+const NodeCache = require('node-cache');
 
+
+const cache = new NodeCache({ stdTTL: 60 }); // Cache data for 60 seconds
 
 const userRouter = express.Router();
 
@@ -70,12 +73,27 @@ userRouter.post("/login",log, async (req, res) => {
 
 // Get all users
 userRouter.get('/get',log, async (req, res) => {
+
     try {
-        const users = await User.find({});
-        res.json(users);
-    } catch (error) {
-        res.status(500).send(error);
-    }
+        const cachedUsers = cache.get('users');
+        if (cachedUsers) {
+          return res.status(200).json({cachedUsers: cachedUsers});
+        }
+    
+        const users = await User.find();
+        cache.set('users', users);
+        res.status(200).json({users: users});
+      } catch (err) {
+        res.status(500).json({ message: err.message });
+      }
+
+
+    // try {
+    //     const users = await User.find({});
+    //     res.json(users);
+    // } catch (error) {
+    //     res.status(500).send(error);
+    // }
 });
 
 userRouter.get("/page/:page", async (req,res) =>{
@@ -93,17 +111,35 @@ userRouter.get("/page/:page", async (req,res) =>{
 
 
 // Get a user by ID
-userRouter.get('/get/:userId',log, async (req, res) => {
+userRouter.get('/get/:id',log, async (req, res) => {
+
+
+
     try {
-        const user = await User.findById(req.params.userId);
-        if (!user) {
-            res.status(404).send('User not found');
-        } else {
-            res.json(user);
+        const cachedUser = cache.get(`user_${req.params.id}`);
+        if (cachedUser) {
+          return res.status(200).json({cachedUser: cachedUser});
         }
-    } catch (error) {
-        res.status(500).send(error);
-    }
+    
+        const user = await User.findById(req.params.id);
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+        cache.set(`user_${req.params.id}`, user);
+        res.status(200).json({user: user});
+      } catch (err) {
+        res.status(500).json({ message: err.message });
+      }
+    // try {
+    //     const user = await User.findById(req.params.userId);
+    //     if (!user) {
+    //         res.status(404).send('User not found');
+    //     } else {
+    //         res.json(user);
+    //     }
+    // } catch (error) {
+    //     res.status(500).send(error);
+    // }
 });
 
 // Update a user
